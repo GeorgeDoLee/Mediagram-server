@@ -1,0 +1,10 @@
+@allnews_HostAddress = https://localhost:7040
+
+GET {{allnews_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+GET {{allnews_HostAddress}}/api/employees
+
+###
