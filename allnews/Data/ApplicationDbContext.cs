@@ -10,5 +10,8 @@ namespace allnews.Data
         }
 
         public DbSet<Publisher> Publishers { get; set; }
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<SubArticle> SubArticles { get; set; }
+
     }
 }

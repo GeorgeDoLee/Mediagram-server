@@ -12,7 +12,7 @@ namespace allnews.Controllers
     public class PublisherController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-        private static readonly string[] ValidPositions = { "left", "center", "right" };
+        private static readonly string[] ValidPositions = { "opp", "center", "gov" };
 
         public PublisherController(ApplicationDbContext context)
         {
@@ -53,21 +53,21 @@ namespace allnews.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddPublisher(AddPublisherDto addPublisherDto)
+        public IActionResult AddPublisher(PublisherDto publisherDto)
         {
             try
             {
-                if(!ValidPositions.Contains(addPublisherDto.Position)){
+                if(!ValidPositions.Contains(publisherDto.Position)){
                     throw new ArgumentException("Invalid position");
                 }
 
                 var publisherEntity = new Publisher()
                 {
-                    Name = addPublisherDto.Name,
-                    Logo = addPublisherDto.Logo,
-                    Position = addPublisherDto.Position,
-                    TitleClass = addPublisherDto.TitleClass,
-                    ArticleClass = addPublisherDto.ArticleClass,
+                    Name = publisherDto.Name,
+                    Logo = publisherDto.Logo,
+                    Position = publisherDto.Position,
+                    TitleClass = publisherDto.TitleClass,
+                    ArticleClass = publisherDto.ArticleClass,
                 };
 
                 dbContext.Publishers.Add(publisherEntity);
@@ -82,7 +82,7 @@ namespace allnews.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
-        public IActionResult UpdatePublisher(Guid id, UpdatePublisherDto updatePublisherDto)
+        public IActionResult UpdatePublisher(Guid id, PublisherDto publisherDto)
         {
             try
             {
@@ -93,11 +93,11 @@ namespace allnews.Controllers
                     return NotFound();
                 }
 
-                publisher.Name = updatePublisherDto.Name;
-                publisher.Logo = updatePublisherDto.Logo;
-                publisher.Position = updatePublisherDto.Position;
-                publisher.TitleClass = updatePublisherDto.TitleClass;
-                publisher.ArticleClass = updatePublisherDto.ArticleClass;
+                publisher.Name = publisherDto.Name;
+                publisher.Logo = publisherDto.Logo;
+                publisher.Position = publisherDto.Position;
+                publisher.TitleClass = publisherDto.TitleClass;
+                publisher.ArticleClass = publisherDto.ArticleClass;
                 dbContext.SaveChanges();
 
                 return Ok(publisher);
@@ -123,7 +123,7 @@ namespace allnews.Controllers
                 dbContext.Publishers.Remove(publisher);
                 dbContext.SaveChanges();
 
-                return Ok();
+                return Ok(new { message = "წაიშალა წარმატებით" });
             } catch (Exception ex)
             {
                 return BadRequest(ex.Message);
