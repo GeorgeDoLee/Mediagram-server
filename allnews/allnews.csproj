@@ -7,12 +7,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\Entities\**" />
+    <Content Remove="Models\Entities\**" />
+    <EmbeddedResource Remove="Models\Entities\**" />
+    <None Remove="Models\Entities\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Models\Entities\Article.cs" />
+    <Compile Include="Models\Entities\Publisher.cs" />
+    <Compile Include="Models\Entities\SubArticle.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotnetSpiderLite.HtmlAgilityPack" Version="0.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>
