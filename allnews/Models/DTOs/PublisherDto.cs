@@ -1,6 +1,7 @@
-﻿namespace allnews.Models.DTOs
+﻿
+namespace allnews.Models.DTOs
 {
-    public class UpdatePublisherDto
+    public class PublisherDto
     {
         public required string Name { get; set; }
         public string? Logo { get; set; }
