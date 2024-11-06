@@ -5,6 +5,11 @@ using HtmlAgilityPack;
 
 namespace allnews.Services
 {
+    public class ScrapedArticle
+    {
+        public required string Url { get; set; }
+        public required string Title { get; set; }
+    }
     public class ArticleScraper
     {
         private readonly HttpClient _httpClient;
@@ -14,7 +19,7 @@ namespace allnews.Services
             _httpClient = new HttpClient();
         }
 
-        public async Task<object> ScrapeArticle(string url, string titleClass, string articleClass)
+        public async Task<ScrapedArticle> ScrapeArticle(string url, string titleClass, string articleClass)
         {
             var response = await _httpClient.GetStringAsync(url);
             var doc = new HtmlDocument();
@@ -23,7 +28,7 @@ namespace allnews.Services
             var titleNode = SelectNodeByClass(doc, titleClass);
             var articleNode = SelectNodeByClass(doc, articleClass);
 
-            return new
+            return new ScrapedArticle
             {
                 Url = url,
                 Title = titleNode?.InnerText.Trim(),
