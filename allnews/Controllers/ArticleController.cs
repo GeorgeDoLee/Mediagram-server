@@ -4,6 +4,7 @@ using allnews.Models.Entities;
 using allnews.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace allnews.Controllers
 {
@@ -25,7 +26,19 @@ namespace allnews.Controllers
         {
             try
             {
-                var articles = dbContext.Articles.ToList();
+                var articles = dbContext.Articles
+                    .Select(a => new ArticleSummaryDto
+                    {
+                        Id = a.Id,
+                        Title = a.Title,
+                        Photo = a.Photo,
+                        OppCoverage = a.OppCoverage,
+                        CenterCoverage = a.CenterCoverage,
+                        GovCoverage = a.GovCoverage,
+                        SubArticleCount = a.SubArticleCount
+                    })
+                    .ToList();
+
                 return Ok(articles);
             }
             catch (Exception ex)
@@ -33,17 +46,22 @@ namespace allnews.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
         [HttpGet("{id:guid}")]
-        public IActionResult GetArticleById(Guid id)
+        public async Task<IActionResult> GetArticleById(Guid id)
         {
             try
             {
-                var article = dbContext.Articles.Find(id);
+                var article = await dbContext.Articles
+                    .Where(a => a.Id == id)
+                    .Include(a => a.SubArticles)
+                        .ThenInclude(sa => sa.Publisher)
+                    .FirstOrDefaultAsync();
+
                 if (article == null)
                 {
                     return NotFound();
                 }
+
                 return Ok(article);
             }
             catch (Exception ex)
@@ -51,6 +69,7 @@ namespace allnews.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
         [HttpDelete("{id:guid}")]
         public IActionResult DeleteArticle(Guid id)
@@ -74,7 +93,7 @@ namespace allnews.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostArticle(AddArticleDto dto)
+        public async Task<IActionResult> PostArticle(AddArticleDtos dto)
         {
             if (dto == null || string.IsNullOrWhiteSpace(dto.Title) || dto.PublisherUrls == null || !dto.PublisherUrls.Any())
             {
@@ -83,8 +102,9 @@ namespace allnews.Controllers
 
             try
             {
-                var subArticleIds = new List<Guid>();
+                Guid articleId = Guid.NewGuid();
                 int oppCount = 0, centerCount = 0, govCount = 0;
+                var subArticles = new List<SubArticle>();
 
                 foreach (var (publisherId, url) in dto.PublisherUrls)
                 {
@@ -105,13 +125,11 @@ namespace allnews.Controllers
                     {
                         Url = url,
                         Title = scrapedData.Title,
-                        PublisherId = publisherId
+                        PublisherId = publisherId,
+                        ArticleId = articleId
                     };
 
-                    dbContext.SubArticles.Add(subArticle);
-                    await dbContext.SaveChangesAsync();
-
-                    subArticleIds.Add(subArticle.Id);
+                    subArticles.Add(subArticle);
 
                     switch (publisher.Position.ToLower())
                     {
@@ -131,16 +149,18 @@ namespace allnews.Controllers
 
                 var article = new Article
                 {
+                    Id = articleId,
                     Title = dto.Title,
                     Photo = dto.Photo,
-                    SubArticleIds = subArticleIds,
                     OppCoverage = oppCoverage,
                     CenterCoverage = centerCoverage,
                     GovCoverage = govCoverage,
-                    SubArticleCount = subArticleIds.Count
+                    SubArticleCount = oppCount + centerCount + govCount,
                 };
 
                 dbContext.Articles.Add(article);
+                dbContext.SubArticles.AddRange(subArticles);
+
                 await dbContext.SaveChangesAsync();
 
                 return Ok(article);
@@ -150,5 +170,6 @@ namespace allnews.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
     }
 }

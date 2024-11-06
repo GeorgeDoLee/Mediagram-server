@@ -12,8 +12,8 @@ using allnews.Data;
 namespace allnews.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241105160626_initial")]
-    partial class initial
+    [Migration("20241106090405_starting again")]
+    partial class startingagain
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,21 +31,20 @@ namespace allnews.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("CenterCoverage")
-                        .HasColumnType("float");
+                    b.Property<int>("CenterCoverage")
+                        .HasColumnType("int");
 
-                    b.Property<double>("GovCoverage")
-                        .HasColumnType("float");
+                    b.Property<int>("GovCoverage")
+                        .HasColumnType("int");
 
-                    b.Property<double>("OppCoverage")
-                        .HasColumnType("float");
+                    b.Property<int>("OppCoverage")
+                        .HasColumnType("int");
 
                     b.Property<string>("Photo")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SubArticleIds")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("SubArticleCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -92,6 +91,9 @@ namespace allnews.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("PublisherId")
                         .HasColumnType("uniqueidentifier");
 
@@ -105,7 +107,23 @@ namespace allnews.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ArticleId");
+
                     b.ToTable("SubArticles");
+                });
+
+            modelBuilder.Entity("allnews.Models.Entities.SubArticle", b =>
+                {
+                    b.HasOne("allnews.Models.Entities.Article", null)
+                        .WithMany("SubArticles")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("allnews.Models.Entities.Article", b =>
+                {
+                    b.Navigation("SubArticles");
                 });
 #pragma warning restore 612, 618
         }

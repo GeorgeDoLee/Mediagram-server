@@ -28,24 +28,20 @@ namespace allnews.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("CenterCoverage")
-                        .HasColumnType("float");
+                    b.Property<int>("CenterCoverage")
+                        .HasColumnType("int");
 
-                    b.Property<double>("GovCoverage")
-                        .HasColumnType("float");
+                    b.Property<int>("GovCoverage")
+                        .HasColumnType("int");
 
-                    b.Property<double>("OppCoverage")
-                        .HasColumnType("float");
+                    b.Property<int>("OppCoverage")
+                        .HasColumnType("int");
 
                     b.Property<string>("Photo")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SubArticleCount")
                         .HasColumnType("int");
-
-                    b.Property<string>("SubArticleIds")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -77,11 +73,16 @@ namespace allnews.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("SubArticleId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("TitleClass")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SubArticleId");
 
                     b.ToTable("Publishers");
                 });
@@ -90,6 +91,9 @@ namespace allnews.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ArticleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("PublisherId")
@@ -105,7 +109,35 @@ namespace allnews.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ArticleId");
+
                     b.ToTable("SubArticles");
+                });
+
+            modelBuilder.Entity("allnews.Models.Entities.Publisher", b =>
+                {
+                    b.HasOne("allnews.Models.Entities.SubArticle", null)
+                        .WithMany("Publishers")
+                        .HasForeignKey("SubArticleId");
+                });
+
+            modelBuilder.Entity("allnews.Models.Entities.SubArticle", b =>
+                {
+                    b.HasOne("allnews.Models.Entities.Article", null)
+                        .WithMany("SubArticles")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("allnews.Models.Entities.Article", b =>
+                {
+                    b.Navigation("SubArticles");
+                });
+
+            modelBuilder.Entity("allnews.Models.Entities.SubArticle", b =>
+                {
+                    b.Navigation("Publishers");
                 });
 #pragma warning restore 612, 618
         }

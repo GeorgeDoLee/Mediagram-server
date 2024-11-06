@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace allnews.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class startingagain : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,10 +18,10 @@ namespace allnews.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Photo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SubArticleIds = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OppCoverage = table.Column<double>(type: "float", nullable: false),
-                    CenterCoverage = table.Column<double>(type: "float", nullable: false),
-                    GovCoverage = table.Column<double>(type: "float", nullable: false)
+                    OppCoverage = table.Column<int>(type: "int", nullable: false),
+                    CenterCoverage = table.Column<int>(type: "int", nullable: false),
+                    GovCoverage = table.Column<int>(type: "int", nullable: false),
+                    SubArticleCount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,27 +33,36 @@ namespace allnews.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ArticleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PublisherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PublisherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SubArticles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubArticles_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubArticles_ArticleId",
+                table: "SubArticles",
+                column: "ArticleId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Articles");
-
-            migrationBuilder.DropTable(
-                name: "Publishers");
-
-            migrationBuilder.DropTable(
                 name: "SubArticles");
+
+            migrationBuilder.DropTable(
+                name: "Articles");
         }
     }
 }
