@@ -28,6 +28,9 @@ namespace allnews.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("CenterCoverage")
                         .HasColumnType("int");
 
@@ -49,7 +52,27 @@ namespace allnews.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("allnews.Models.Entities.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TrendingScore")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("allnews.Models.Entities.Publisher", b =>
@@ -73,16 +96,11 @@ namespace allnews.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("SubArticleId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("TitleClass")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SubArticleId");
 
                     b.ToTable("Publishers");
                 });
@@ -111,14 +129,20 @@ namespace allnews.Migrations
 
                     b.HasIndex("ArticleId");
 
+                    b.HasIndex("PublisherId");
+
                     b.ToTable("SubArticles");
                 });
 
-            modelBuilder.Entity("allnews.Models.Entities.Publisher", b =>
+            modelBuilder.Entity("allnews.Models.Entities.Article", b =>
                 {
-                    b.HasOne("allnews.Models.Entities.SubArticle", null)
-                        .WithMany("Publishers")
-                        .HasForeignKey("SubArticleId");
+                    b.HasOne("allnews.Models.Entities.Category", "Category")
+                        .WithMany("Articles")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("allnews.Models.Entities.SubArticle", b =>
@@ -128,6 +152,14 @@ namespace allnews.Migrations
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("allnews.Models.Entities.Publisher", "Publisher")
+                        .WithMany()
+                        .HasForeignKey("PublisherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Publisher");
                 });
 
             modelBuilder.Entity("allnews.Models.Entities.Article", b =>
@@ -135,9 +167,9 @@ namespace allnews.Migrations
                     b.Navigation("SubArticles");
                 });
 
-            modelBuilder.Entity("allnews.Models.Entities.SubArticle", b =>
+            modelBuilder.Entity("allnews.Models.Entities.Category", b =>
                 {
-                    b.Navigation("Publishers");
+                    b.Navigation("Articles");
                 });
 #pragma warning restore 612, 618
         }

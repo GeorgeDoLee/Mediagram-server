@@ -93,7 +93,7 @@ namespace allnews.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostArticle(AddArticleDtos dto)
+        public async Task<IActionResult> PostArticle(AddArticleDto dto)
         {
             if (dto == null || string.IsNullOrWhiteSpace(dto.Title) || dto.PublisherUrls == null || !dto.PublisherUrls.Any())
             {
@@ -156,6 +156,7 @@ namespace allnews.Controllers
                     CenterCoverage = centerCoverage,
                     GovCoverage = govCoverage,
                     SubArticleCount = oppCount + centerCount + govCount,
+                    CategoryId = dto.CategoryId
                 };
 
                 dbContext.Articles.Add(article);
