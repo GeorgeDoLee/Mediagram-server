@@ -84,7 +84,7 @@ namespace allnews.Controllers
 
                 dbContext.Articles.Remove(article);
                 dbContext.SaveChanges();
-                return Ok(new { message = "სტატია წაიშალა წარმატებით" });
+                return Ok(new { message = "Article deleted successfully" });
             }
             catch (Exception ex)
             {

@@ -10,5 +10,7 @@
         public required int GovCoverage { get; set; }
         public int SubArticleCount { get; set; }
         public List<SubArticle> SubArticles { get; set; } = new List<SubArticle>();
+        public Guid CategoryId { get; set; }
+        public Category Category { get; set; }
     }
 }

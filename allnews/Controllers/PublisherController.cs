@@ -123,7 +123,7 @@ namespace allnews.Controllers
                 dbContext.Publishers.Remove(publisher);
                 dbContext.SaveChanges();
 
-                return Ok(new { message = "წაიშალა წარმატებით" });
+                return Ok(new { message = "Publisher deleted successfully" });
             } catch (Exception ex)
             {
                 return BadRequest(ex.Message);

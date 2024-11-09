@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <Compile Include="Models\Entities\Article.cs" />
+    <Compile Include="Models\Entities\Category.cs" />
     <Compile Include="Models\Entities\Publisher.cs" />
     <Compile Include="Models\Entities\SubArticle.cs" />
   </ItemGroup>
