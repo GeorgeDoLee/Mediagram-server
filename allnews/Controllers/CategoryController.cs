@@ -1,6 +1,7 @@
 ﻿using allnews.Data;
 using allnews.Models.DTOs;
 using allnews.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,7 +35,6 @@ namespace allnews.Controllers
             }
         }
 
-
         [HttpGet("{id:guid}")]
         public IActionResult GetCategoryById(Guid id)
         {
@@ -56,6 +56,7 @@ namespace allnews.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult AddCategory(CategoryDto categoryDto)
         {
             try
@@ -74,6 +75,7 @@ namespace allnews.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize]
         public IActionResult UpdateCategory(Guid id, CategoryDto categoryDto)
         {
             try
@@ -98,6 +100,7 @@ namespace allnews.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize]
         public IActionResult DeleteCategory(Guid id)
         {
             try

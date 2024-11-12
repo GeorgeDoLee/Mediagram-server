@@ -1,6 +1,7 @@
 ﻿using allnews.Data;
 using allnews.Models.DTOs;
 using allnews.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,7 @@ namespace allnews.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult AddPublisher(PublisherDto publisherDto)
         {
             try
@@ -82,6 +84,7 @@ namespace allnews.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
+        [Authorize]
         public IActionResult UpdatePublisher(Guid id, PublisherDto publisherDto)
         {
             try
@@ -109,6 +112,7 @@ namespace allnews.Controllers
 
         [HttpDelete]
         [Route("{id:guid}")]
+        [Authorize]
         public IActionResult DeleteEmployee(Guid id)
         {
             try

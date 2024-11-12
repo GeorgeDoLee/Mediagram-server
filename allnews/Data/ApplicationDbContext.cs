@@ -13,7 +13,6 @@ namespace allnews.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<SubArticle> SubArticles { get; set; }
-
-
+        public DbSet<Admin> Admins { get; set; }
     }
 }

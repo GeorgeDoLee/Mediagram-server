@@ -2,6 +2,7 @@
 using allnews.Models.DTOs;
 using allnews.Models.Entities;
 using allnews.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -108,6 +109,7 @@ namespace allnews.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize]
         public IActionResult DeleteArticle(Guid id)
         {
             try
@@ -129,6 +131,7 @@ namespace allnews.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> PostArticle(AddArticleDto dto)
         {
             if (dto == null || string.IsNullOrWhiteSpace(dto.Title) || dto.PublisherUrls == null || !dto.PublisherUrls.Any())
