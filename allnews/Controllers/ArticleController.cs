@@ -35,7 +35,9 @@ namespace allnews.Controllers
                         OppCoverage = a.OppCoverage,
                         CenterCoverage = a.CenterCoverage,
                         GovCoverage = a.GovCoverage,
-                        SubArticleCount = a.SubArticleCount
+                        SubArticleCount = a.SubArticleCount,
+                        IsBlindSpot = a.IsBlindSpot,
+                        CategoryName = a.Category.Name
                     })
                     .ToList();
 
@@ -46,6 +48,7 @@ namespace allnews.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetArticleById(Guid id)
         {
@@ -53,6 +56,7 @@ namespace allnews.Controllers
             {
                 var article = await dbContext.Articles
                     .Where(a => a.Id == id)
+                    .Include(a => a.Category)
                     .Include(a => a.SubArticles)
                         .ThenInclude(sa => sa.Publisher)
                     .FirstOrDefaultAsync();
@@ -62,6 +66,11 @@ namespace allnews.Controllers
                     return NotFound();
                 }
 
+                article.Category.TrendingScore++;
+
+                dbContext.Categories.Update(article.Category);
+                await dbContext.SaveChangesAsync();
+
                 return Ok(article);
             }
             catch (Exception ex)
@@ -69,7 +78,6 @@ namespace allnews.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
 
         [HttpDelete("{id:guid}")]
         public IActionResult DeleteArticle(Guid id)
@@ -111,41 +119,44 @@ namespace allnews.Controllers
                     var publisher = dbContext.Publishers.Find(publisherId);
                     if (publisher == null)
                     {
-                        return NotFound($"Publisher with ID {publisherId} not found.");
-                    }
-
-                    var scrapedData = await articleScraper.ScrapeArticle(url, publisher.TitleClass, publisher.ArticleClass);
-                    if (scrapedData == null || string.IsNullOrEmpty(scrapedData.Title))
-                    {
-                        Console.WriteLine($"Failed to scrape article from URL: {url}");
+                        Console.WriteLine($"Publisher with ID {publisherId} not found.");
                         continue;
                     }
 
-                    var subArticle = new SubArticle
+                    ScrapedArticle scrapedArticle;
+                    try
+                    {
+                        scrapedArticle = await articleScraper.ScrapeArticle(url, publisher.ArticleClass);
+                        if (scrapedArticle == null || string.IsNullOrEmpty(scrapedArticle.Title))
+                        {
+                            Console.WriteLine($"Failed to scrape article from URL: {url}");
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error scraping {url}: {ex.Message}");
+                        continue;
+                    }
+
+                    subArticles.Add(new SubArticle
                     {
                         Url = url,
-                        Title = scrapedData.Title,
+                        Title = scrapedArticle.Title,
                         PublisherId = publisherId,
                         ArticleId = articleId
-                    };
+                    });
 
-                    subArticles.Add(subArticle);
-
-                    switch (publisher.Position.ToLower())
+                    switch (publisher.Position.ToLowerInvariant())
                     {
-                        case "opp":
-                            oppCount++;
-                            break;
-                        case "center":
-                            centerCount++;
-                            break;
-                        case "gov":
-                            govCount++;
-                            break;
+                        case "opp": oppCount++; break;
+                        case "center": centerCount++; break;
+                        case "gov": govCount++; break;
                     }
                 }
 
                 var (oppCoverage, centerCoverage, govCoverage) = CoverageCalculator.CalculateCoverage(oppCount, centerCount, govCount);
+                bool isBlindSpot = oppCoverage > 70 || govCoverage > 70;
 
                 var article = new Article
                 {
@@ -155,22 +166,22 @@ namespace allnews.Controllers
                     OppCoverage = oppCoverage,
                     CenterCoverage = centerCoverage,
                     GovCoverage = govCoverage,
-                    SubArticleCount = oppCount + centerCount + govCount,
-                    CategoryId = dto.CategoryId
+                    SubArticleCount = subArticles.Count,
+                    CategoryId = dto.CategoryId,
+                    IsBlindSpot = isBlindSpot
                 };
 
                 dbContext.Articles.Add(article);
                 dbContext.SubArticles.AddRange(subArticles);
-
                 await dbContext.SaveChangesAsync();
 
                 return Ok(article);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
             }
         }
-
     }
 }

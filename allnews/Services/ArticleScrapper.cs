@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using System.Web;
 
 namespace allnews.Services
 {
@@ -10,6 +11,7 @@ namespace allnews.Services
         public required string Url { get; set; }
         public required string Title { get; set; }
     }
+
     public class ArticleScraper
     {
         private readonly HttpClient _httpClient;
@@ -19,21 +21,43 @@ namespace allnews.Services
             _httpClient = new HttpClient();
         }
 
-        public async Task<ScrapedArticle> ScrapeArticle(string url, string titleClass, string articleClass)
+        public async Task<ScrapedArticle> ScrapeArticle(string url, string articleClass = "")
         {
             var response = await _httpClient.GetStringAsync(url);
             var doc = new HtmlDocument();
             doc.LoadHtml(response);
 
-            var titleNode = SelectNodeByClass(doc, titleClass);
-            var articleNode = SelectNodeByClass(doc, articleClass);
+            var title = GetTitleFromHeader(doc);
+            title = HttpUtility.HtmlDecode(title)?.Trim();
+            var articleNode = string.IsNullOrEmpty(articleClass) ? null : SelectNodeByClass(doc, articleClass);
 
             return new ScrapedArticle
             {
                 Url = url,
-                Title = titleNode?.InnerText.Trim(),
-                //ArticleText = articleNode?.InnerText.Trim(),
+                Title = title,
+                // ArticleText = articleText?.Trim(),
             };
+        }
+
+        private string GetTitleFromHeader(HtmlDocument doc)
+        {
+            var titleNode = doc.DocumentNode.SelectSingleNode("//title");
+            if (titleNode != null)
+                return titleNode.InnerText;
+
+            var metaOgTitle = doc.DocumentNode.SelectSingleNode("//meta[@property='og:title']");
+            if (metaOgTitle != null && metaOgTitle.Attributes["content"] != null)
+                return metaOgTitle.Attributes["content"].Value;
+
+            var metaTwitterTitle = doc.DocumentNode.SelectSingleNode("//meta[@name='twitter:title']");
+            if (metaTwitterTitle != null && metaTwitterTitle.Attributes["content"] != null)
+                return metaTwitterTitle.Attributes["content"].Value;
+
+            var metaTitle = doc.DocumentNode.SelectSingleNode("//meta[@name='title']");
+            if (metaTitle != null && metaTitle.Attributes["content"] != null)
+                return metaTitle.Attributes["content"].Value;
+
+            return null;
         }
 
         private HtmlNode SelectNodeByClass(HtmlDocument doc, string className)
@@ -51,3 +75,4 @@ namespace allnews.Services
         }
     }
 }
+

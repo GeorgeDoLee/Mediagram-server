@@ -12,5 +12,7 @@
         public List<SubArticle> SubArticles { get; set; } = new List<SubArticle>();
         public Guid CategoryId { get; set; }
         public Category Category { get; set; }
+        public bool IsBlindSpot { get; set; } = false;
+
     }
 }

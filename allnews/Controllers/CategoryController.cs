@@ -22,7 +22,10 @@ namespace allnews.Controllers
         {
             try
             {
-                var categories = dbContext.Categories.ToList();
+                var categories = dbContext.Categories
+                    .OrderByDescending(c => c.TrendingScore)
+                    .ToList();
+
                 return Ok(categories);
             }
             catch (Exception ex)
@@ -30,6 +33,7 @@ namespace allnews.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
         [HttpGet("{id:guid}")]
         public IActionResult GetCategoryById(Guid id)

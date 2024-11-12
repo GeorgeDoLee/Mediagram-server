@@ -6,7 +6,7 @@ namespace allnews.Models.DTOs
     {
         public required string Title { get; set; }
         public string? Photo { get; set; }
-        public Guid CategoryId { get; set; }
+        public required Guid CategoryId { get; set; }
         public Dictionary<Guid, string> PublisherUrls { get; set; } = new();
     }
 
@@ -19,5 +19,7 @@ namespace allnews.Models.DTOs
         public int CenterCoverage { get; set; }
         public int GovCoverage { get; set; }
         public int SubArticleCount { get; set; }
+        public bool IsBlindSpot { get; set; }
+        public string CategoryName { get; set; }
     }
 }

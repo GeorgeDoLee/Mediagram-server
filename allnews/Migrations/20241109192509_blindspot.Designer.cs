@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using allnews.Data;
 
@@ -11,9 +12,11 @@ using allnews.Data;
 namespace allnews.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241109192509_blindspot")]
+    partial class blindspot
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -140,7 +143,7 @@ namespace allnews.Migrations
             modelBuilder.Entity("allnews.Models.Entities.Article", b =>
                 {
                     b.HasOne("allnews.Models.Entities.Category", "Category")
-                        .WithMany()
+                        .WithMany("Articles")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -168,6 +171,11 @@ namespace allnews.Migrations
             modelBuilder.Entity("allnews.Models.Entities.Article", b =>
                 {
                     b.Navigation("SubArticles");
+                });
+
+            modelBuilder.Entity("allnews.Models.Entities.Category", b =>
+                {
+                    b.Navigation("Articles");
                 });
 #pragma warning restore 612, 618
         }
