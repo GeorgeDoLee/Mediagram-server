@@ -22,11 +22,29 @@ namespace allnews.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllArticles()
+        public IActionResult GetAllArticles(bool? isBlindSpot = null, int pageNumber = 1, int pageSize = 10, bool? sortByTrending = null)
         {
             try
             {
-                var articles = dbContext.Articles
+                var skipCount = (pageNumber - 1) * pageSize;
+
+                var articlesQuery = dbContext.Articles
+                    .Where(a => !isBlindSpot.HasValue || a.IsBlindSpot == isBlindSpot.Value);
+
+                if (sortByTrending.HasValue && sortByTrending.Value)
+                {
+                    articlesQuery = articlesQuery.OrderByDescending(a => a.TrendingScore);
+                }
+                else
+                {
+                    articlesQuery = articlesQuery.OrderByDescending(a => a.UploadDate);
+                }
+
+                var totalArticles = articlesQuery.Count();
+
+                var articles = articlesQuery
+                    .Skip(skipCount)
+                    .Take(pageSize)
                     .Select(a => new ArticleSummaryDto
                     {
                         Id = a.Id,
@@ -41,7 +59,15 @@ namespace allnews.Controllers
                     })
                     .ToList();
 
-                return Ok(articles);
+                bool hasNextPage = (skipCount + pageSize) < totalArticles;
+
+                var result = new
+                {
+                    Articles = articles,
+                    HasNextPage = hasNextPage
+                };
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -67,7 +93,9 @@ namespace allnews.Controllers
                 }
 
                 article.Category.TrendingScore++;
+                article.TrendingScore++;
 
+                dbContext.Articles.Update(article);
                 dbContext.Categories.Update(article.Category);
                 await dbContext.SaveChangesAsync();
 

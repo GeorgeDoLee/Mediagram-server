@@ -13,6 +13,7 @@
         public Guid CategoryId { get; set; }
         public Category Category { get; set; }
         public bool IsBlindSpot { get; set; } = false;
-
+        public DateTime UploadDate { get; set; } = DateTime.UtcNow;
+        public int TrendingScore { get; set; } = 0;
     }
 }
