@@ -2,6 +2,7 @@
 using allnews.Models.DTOs;
 using allnews.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,10 +14,11 @@ namespace allnews.Controllers
     public class AdminController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-
+        private readonly PasswordHasher<Admin> _passwordHasher;
         public AdminController(ApplicationDbContext context)
         {
             dbContext = context;
+            _passwordHasher = new PasswordHasher<Admin>();
         }
 
         [HttpGet]
@@ -46,7 +48,7 @@ namespace allnews.Controllers
                 }
 
                 existingAdmin.Username = dto.Username;
-                existingAdmin.PasswordHash = dto.PasswordHash;
+                existingAdmin.PasswordHash = _passwordHasher.HashPassword(null, dto.Password);
 
                 dbContext.SaveChanges();
 

@@ -37,15 +37,14 @@ namespace allnews.Controllers
                 var adminEntity = new Admin()
                 {
                     Username = dto.Username,
-                    PasswordHash = _passwordHasher.HashPassword(null, dto.PasswordHash)
+                    PasswordHash = _passwordHasher.HashPassword(null, dto.Password)
                 };
 
                 dbContext.Admins.Add(adminEntity);
                 dbContext.SaveChanges();
 
-                var token = TokenGenerator.Generate(adminEntity);
 
-                return Ok(new { message = "Admin created successfully", Token = token });
+                return Ok(new { message = "Admin created successfully" });
             }
             catch (Exception ex)
             {
@@ -54,7 +53,7 @@ namespace allnews.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login(LoginDto dto)
+        public IActionResult Login(AdminDto dto)
         {
             try
             {
