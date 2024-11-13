@@ -23,14 +23,16 @@ namespace allnews.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllArticles(bool? isBlindSpot = null, int pageNumber = 1, int pageSize = 10, bool? sortByTrending = null)
+        public IActionResult GetAllArticles(bool? isBlindSpot = null, int pageNumber = 1, int pageSize = 10, bool? sortByTrending = null, Guid? categoryId = null)
         {
             try
             {
                 var skipCount = (pageNumber - 1) * pageSize;
 
                 var articlesQuery = dbContext.Articles
-                    .Where(a => !isBlindSpot.HasValue || a.IsBlindSpot == isBlindSpot.Value);
+                    .Where(a =>
+                        (!isBlindSpot.HasValue || a.IsBlindSpot == isBlindSpot.Value) &&
+                        (!categoryId.HasValue || a.CategoryId == categoryId.Value));
 
                 if (sortByTrending.HasValue && sortByTrending.Value)
                 {
